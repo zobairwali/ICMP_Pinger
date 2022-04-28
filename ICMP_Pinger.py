@@ -104,4 +104,5 @@ def ping(host, timeout=1):
         loop += 1
     return delay
 
-ping("8.8.8.8")
+host = input("Please enter the URL/IP you want to ping: ")
+ping(host)
