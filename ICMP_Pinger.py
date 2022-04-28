@@ -44,7 +44,7 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
         icmpHeader = recPacket[20:28]
         icmpType, code, mychecksum, packetID, sequence = struct.unpack("bbHHh", icmpHeader)
     
-        if type != 8 and packetID == ID:
+        if icmpType != 8 and packetID == ID:
             bytesInDouble = struct.calcsize("d")
             timeSent = struct.unpack("d", recPacket[28:28 + bytesInDouble])[0]
             return timeReceived - timeSent
@@ -78,27 +78,30 @@ def sendOnePing(mySocket, destAddr, ID):
     #Both LISTS and TUPLES consist of a number of objects
     #which can be referenced by their position number within the object
 
-def doOnePing(destAddr, timeout):         
-    icmp = getprotobyname("icmp") 
+def doOnePing(destAddr, timeout):
+    icmp = getprotobyname("icmp")
     #Create Socket here
-    mySocket = socket(AF_INET, SOCK_DGRAM, icmp) 
+    mySocket = socket(AF_INET, SOCK_RAW, icmp)
 
-    myID = os.getpid() & 0xFFFF  #Return the current process i     
-    sendOnePing(mySocket, destAddr, myID) 
-    delay = receiveOnePing(mySocket, myID, timeout, destAddr)          
+    myID = os.getpid() & 0xFFFF  #Return the current process i
+    sendOnePing(mySocket, destAddr, myID)
+    delay = receiveOnePing(mySocket, myID, timeout, destAddr)
 
-    mySocket.close()         
-    return delay  
+    mySocket.close()
+    return delay
 
 def ping(host, timeout=1):
     dest = gethostbyname(host)
     print ("Pinging " + dest + " using Python:")
     print ("")
+
+    loop=0
     #Send ping requests to a server separated by approximately one second
-    while 1 :
+    while loop < 10:
         delay = doOnePing(dest, timeout)
         print (delay)
         time.sleep(1)# one second
+        loop += 1
     return delay
 
-ping("127.0.0.1")
+ping("8.8.8.8")
